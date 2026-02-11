@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html><head><title>OGA PLASTIC Logo Test</title>
+<style>
+body { background: #f5f5f5; display: flex; gap: 40px; padding: 40px; flex-wrap: wrap; font-family: system-ui; }
+.card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); text-align: center; }
+.card h3 { margin: 12px 0 4px; font-size: 14px; }
+.card p { margin: 0; font-size: 11px; color: #888; }
+.dark { background: #0F3D47; }
+.dark h3, .dark p { color: white; }
+.gold-border { border: 2px solid #D4A853; }
+.lockup { display: flex; align-items: center; gap: 12px; justify-content: center; }
+.lockup-text { text-align: left; line-height: 1.2; }
+.lockup-text .name { font-size: 14px; font-weight: 700; letter-spacing: 0.05em; }
+.lockup-text .sub { font-size: 9px; letter-spacing: 0.15em; opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<div class="card gold-border">
+  <img src="/images/logo-icon.png" width="160" height="160" style="object-fit:contain;">
+  <h3>Logo Icon (Real PNG)</h3>
+  <p>From brochure — the actual logo</p>
+</div>
+
+<div class="card dark gold-border">
+  <img src="/images/logo-icon.png" width="160" height="160" style="object-fit:contain; filter: brightness(0) invert(1);">
+  <h3>White Variant</h3>
+  <p>CSS filter for dark backgrounds</p>
+</div>
+
+<div class="card">
+  <div class="lockup">
+    <img src="/images/logo-icon.png" width="48" height="48" style="object-fit:contain;">
+    <div class="lockup-text">
+      <div class="name" style="color:#0F3D47;">OGA PLASTIC</div>
+      <div class="sub" style="color:#0F3D47;">MANUFACTURING NIG. LTD</div>
+    </div>
+  </div>
+  <h3>Full Lockup (Light bg)</h3>
+  <p>Icon + wordmark</p>
+</div>
+
+<div class="card dark">
+  <div class="lockup">
+    <img src="/images/logo-icon.png" width="48" height="48" style="object-fit:contain; filter: brightness(0) invert(1);">
+    <div class="lockup-text">
+      <div class="name" style="color:white;">OGA PLASTIC</div>
+      <div class="sub" style="color:white;">MANUFACTURING NIG. LTD</div>
+    </div>
+  </div>
+  <h3>Full Lockup (Dark bg)</h3>
+  <p>White variant + wordmark</p>
+</div>
+
+<div class="card" style="width: 100%;">
+  <div style="display: flex; gap: 32px; justify-content: center; align-items: center; flex-wrap: wrap;">
+    <img src="/images/logo-icon.png" width="24" height="24" style="object-fit:contain;">
+    <img src="/images/logo-icon.png" width="40" height="40" style="object-fit:contain;">
+    <img src="/images/logo-icon.png" width="64" height="64" style="object-fit:contain;">
+    <img src="/images/logo-icon.png" width="96" height="96" style="object-fit:contain;">
+    <img src="/images/logo-icon.png" width="128" height="128" style="object-fit:contain;">
+  </div>
+  <h3>Size Scale</h3>
+  <p>24px — 40px — 64px — 96px — 128px</p>
+</div>
+
+</body></html>
