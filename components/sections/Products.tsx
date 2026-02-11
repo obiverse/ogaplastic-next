@@ -111,20 +111,23 @@ export function Products() {
           ))}
         </div>
 
-        {/* Tab content */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        {/* Tab content — crossfade on tab switch */}
+        <div
+          key={activeTab}
+          className="grid lg:grid-cols-2 gap-12 items-center animate-fadeIn"
+        >
           {/* Image area */}
           <div className="reveal">
-            <div className="relative bg-sand-light rounded-3xl p-8 flex items-center justify-center min-h-[400px]">
+            <div className="product-image-container relative bg-sand-light rounded-3xl p-8 flex items-center justify-center min-h-[400px] transition-all duration-500">
               <Image
                 src={data.image}
                 alt={data.imageAlt}
                 width={400}
                 height={450}
-                className="object-contain drop-shadow-lg max-h-[400px] w-auto"
+                className="object-contain drop-shadow-lg max-h-[400px] w-auto transition-transform duration-500"
                 style={data.imageRotate ? { transform: `rotate(${data.imageRotate}deg)` } : undefined}
               />
-              <span className="absolute top-4 right-4 bg-teal text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+              <span className="absolute top-4 right-4 bg-teal text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
                 {data.badge}
               </span>
             </div>
@@ -141,10 +144,11 @@ export function Products() {
 
             {/* Feature cards */}
             <div className="grid sm:grid-cols-2 gap-4 mb-8">
-              {data.features.map((f) => (
+              {data.features.map((f, i) => (
                 <div
                   key={f.title}
                   className="card-hover bg-sand-light rounded-xl p-5"
+                  style={{ animationDelay: `${i * 0.08}s` }}
                 >
                   <h4 className="font-semibold text-teal-deep text-sm mb-1">
                     {f.title}

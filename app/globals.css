@@ -72,7 +72,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   background: var(--oga-teal-deep);
-  transition: opacity 0.6s ease, visibility 0.6s ease;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s ease;
 }
 .loading-screen.hidden {
   opacity: 0;
@@ -84,25 +84,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 @keyframes loadingPulse {
   0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.8; }
-}
-.loading-bar {
-  width: 200px;
-  height: 3px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 4px;
-  margin-top: 2rem;
-  overflow: hidden;
-}
-.loading-bar-fill {
-  height: 100%;
-  background: var(--oga-gold);
-  border-radius: 4px;
-  animation: loadingFill 1.5s ease-out forwards;
-}
-@keyframes loadingFill {
-  from { width: 0%; }
-  to { width: 100%; }
+  50% { transform: scale(1.08); opacity: 0.7; }
 }
 
 /* ── Section common ── */
@@ -121,72 +103,156 @@ h1, h2, h3, h4, h5, h6 {
 .section-tag::before {
   content: "";
   display: block;
-  width: 2rem;
+  width: 0;
   height: 2px;
   background: var(--oga-gold);
+  animation: tagLineGrow 0.8s ease forwards;
+  animation-delay: 0.3s;
+}
+@keyframes tagLineGrow {
+  to { width: 2rem; }
 }
 
-/* ── Scroll reveal ── */
+/* ── Scroll reveal — enhanced with stagger support ── */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transform: translateY(32px);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
+/* Stagger children within a reveal container */
+.reveal.visible .stagger-child {
+  animation: staggerIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.stagger-child { opacity: 0; transform: translateY(16px); }
+.stagger-child:nth-child(1) { animation-delay: 0s; }
+.stagger-child:nth-child(2) { animation-delay: 0.08s; }
+.stagger-child:nth-child(3) { animation-delay: 0.16s; }
+.stagger-child:nth-child(4) { animation-delay: 0.24s; }
+.stagger-child:nth-child(5) { animation-delay: 0.32s; }
+.stagger-child:nth-child(6) { animation-delay: 0.4s; }
+@keyframes staggerIn {
+  to { opacity: 1; transform: translateY(0); }
+}
 
 /* ── Hero stagger ── */
 .hero-stagger > * {
   opacity: 0;
-  transform: translateY(20px);
-  animation: heroFadeUp 0.6s ease forwards;
+  transform: translateY(24px);
+  animation: heroFadeUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
-.hero-stagger > *:nth-child(1) { animation-delay: 0.1s; }
-.hero-stagger > *:nth-child(2) { animation-delay: 0.3s; }
-.hero-stagger > *:nth-child(3) { animation-delay: 0.5s; }
-.hero-stagger > *:nth-child(4) { animation-delay: 0.7s; }
-.hero-stagger > *:nth-child(5) { animation-delay: 0.9s; }
+.hero-stagger > *:nth-child(1) { animation-delay: 0.2s; }
+.hero-stagger > *:nth-child(2) { animation-delay: 0.4s; }
+.hero-stagger > *:nth-child(3) { animation-delay: 0.6s; }
+.hero-stagger > *:nth-child(4) { animation-delay: 0.8s; }
+.hero-stagger > *:nth-child(5) { animation-delay: 1.0s; }
+.hero-stagger > *:nth-child(6) { animation-delay: 1.2s; }
 
 @keyframes heroFadeUp {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Card hover ── */
-.card-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* Hero tank entrance — slides up with scale */
+.hero-tank-entrance {
+  opacity: 0;
+  transform: translateY(60px) scale(0.92);
+  animation: tankEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.6s;
 }
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+@keyframes tankEntrance {
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ── Gold CTA ── */
+/* Hero tank subtle float */
+.hero-tank-float {
+  animation: tankFloat 4s ease-in-out infinite;
+  animation-delay: 1.8s;
+}
+@keyframes tankFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Hero badge pop-in */
+.hero-badge-pop {
+  opacity: 0;
+  transform: scale(0.8) translateY(10px);
+  animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: 1.4s;
+}
+@keyframes badgePop {
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Card hover — enhanced ── */
+.card-hover {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.1);
+}
+/* Shine sweep on hover */
+.card-hover::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+.card-hover:hover::after {
+  left: 120%;
+}
+
+/* ── Gold CTA — with shimmer ── */
 .btn-gold {
-  background: var(--oga-gold);
+  background: linear-gradient(135deg, var(--oga-gold) 0%, var(--oga-gold-light) 100%);
   color: var(--oga-teal-deep);
   font-weight: 600;
   padding: 0.875rem 2rem;
   border-radius: 8px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.btn-gold::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: btnShimmer 3s ease-in-out infinite;
+}
+@keyframes btnShimmer {
+  0%, 100% { left: -100%; }
+  50% { left: 100%; }
 }
 .btn-gold:hover {
-  background: var(--oga-gold-light);
-  transform: scale(1.02);
-  box-shadow: 0 4px 20px rgba(212,168,83,0.4);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(212,168,83,0.4);
 }
 
 .btn-outline {
-  border: 2px solid rgba(255,255,255,0.5);
+  border: 2px solid rgba(255,255,255,0.4);
   color: white;
   padding: 0.875rem 2rem;
   border-radius: 8px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -194,15 +260,16 @@ h1, h2, h3, h4, h5, h6 {
 .btn-outline:hover {
   border-color: white;
   background: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
 }
 
-/* ── Tab buttons ── */
+/* ── Product tab transitions ── */
 .tab-btn {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-weight: 600;
   font-size: 0.9rem;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--oga-slate);
   background: transparent;
   border: 2px solid var(--oga-light-grey);
@@ -212,10 +279,42 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--oga-teal);
   color: white;
   border-color: var(--oga-teal);
+  box-shadow: 0 4px 16px rgba(43,122,140,0.3);
 }
 .tab-btn:hover:not([aria-selected="true"]) {
   border-color: var(--oga-teal);
   color: var(--oga-teal);
+  transform: translateY(-2px);
+}
+
+/* Product image shine on hover */
+.product-image-container {
+  position: relative;
+  overflow: hidden;
+}
+.product-image-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.8s ease;
+  pointer-events: none;
+  z-index: 5;
+}
+.product-image-container:hover::after {
+  left: 150%;
+}
+
+/* ── Crossfade animation for tab content ── */
+.animate-fadeIn {
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Reduced motion ── */
@@ -228,6 +327,9 @@ h1, h2, h3, h4, h5, h6 {
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; }
   .hero-stagger > * { opacity: 1; transform: none; }
+  .hero-tank-entrance { opacity: 1; transform: none; }
+  .hero-badge-pop { opacity: 1; transform: none; }
+  .stagger-child { opacity: 1; transform: none; }
 }
 
 /* ── Focus visible ── */
