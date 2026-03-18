@@ -218,8 +218,14 @@ export function Navbar() {
                 Order Now
               </Button>
               <button
-                onClick={() => setPortalOpen(true)}
+                onClick={() => window.dispatchEvent(new Event("oga-open-order-history"))}
                 className="ml-2 px-4 py-2.5 text-sm font-medium text-white/70 hover:text-white transition-colors cursor-pointer"
+              >
+                My Orders
+              </button>
+              <button
+                onClick={() => setPortalOpen(true)}
+                className="ml-1 px-3 py-2.5 text-sm font-medium text-white/50 hover:text-white/80 transition-colors cursor-pointer"
               >
                 Portal
               </button>
@@ -355,11 +361,20 @@ export function Navbar() {
             <button
               onClick={() => {
                 closeDrawer();
-                setPortalOpen(true);
+                window.dispatchEvent(new Event("oga-open-order-history"));
               }}
               className="text-sm text-white/70 hover:text-white py-2 cursor-pointer"
             >
-              Portal Login
+              My Orders
+            </button>
+            <button
+              onClick={() => {
+                closeDrawer();
+                setPortalOpen(true);
+              }}
+              className="text-sm text-white/50 hover:text-white/80 py-2 cursor-pointer"
+            >
+              Portal
             </button>
             <button
               onClick={toggleTheme}

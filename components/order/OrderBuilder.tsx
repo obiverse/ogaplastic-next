@@ -10,6 +10,9 @@ import { TANK_PRICES, BIN_PRICES, formatNaira } from "@/lib/constants";
 import { ALL_STATES, STATE_TO_ZONE, DELIVERY_ZONES, estimateDelivery } from "@/lib/delivery-zones";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { generateRefNumber, encodeOrderConfig, decodeOrderConfig, type OrderConfig, DEFAULT_ORDER } from "@/lib/order-config";
+import { saveOrder, type SavedOrder } from "@/lib/order-store";
+import { openPrintableQuote, type QuoteData } from "./PrintableQuote";
+import { generateQRDataUrl } from "@/lib/qr";
 
 type ProductType = "tank" | "bin" | "custom";
 
@@ -113,9 +116,22 @@ export function OrderBuilder() {
     setVolumeIndex(0);
   }
 
-  function handleOrder() {
+  function buildOrderDetails() {
     const ref = generateRefNumber();
     const productName = productType === "tank" ? "Water Tank" : productType === "bin" ? "Waste Bin" : "Custom Product";
+    const orderHash = encodeOrderConfig({
+      productType,
+      volumeIndex,
+      quantity,
+      color: "grey",
+      deliveryState,
+      branding,
+    });
+    return { ref, productName, orderHash };
+  }
+
+  function handleOrder() {
+    const { ref, productName, orderHash } = buildOrderDetails();
     const url = buildWhatsAppUrl({
       type: "catalog-order",
       ref,
@@ -129,7 +145,52 @@ export function OrderBuilder() {
       branding,
       total: totalDisplay,
     });
+
+    // Save to IndexedDB
+    const saved: SavedOrder = {
+      ref,
+      timestamp: Date.now(),
+      productType,
+      productName,
+      volume: item.volume,
+      quantity,
+      unitPrice,
+      subtotal,
+      deliveryState,
+      deliveryZone: zone ? `Zone ${zone.id}` : "",
+      deliveryEstimate,
+      branding,
+      total: totalDisplay,
+      orderHash,
+    };
+    saveOrder(saved).then(() => {
+      window.dispatchEvent(new Event("oga-order-saved"));
+    });
+
     window.open(url, "_blank");
+  }
+
+  function handlePrintQuote() {
+    const { ref, productName, orderHash } = buildOrderDetails();
+    const orderUrl = `${window.location.origin}${window.location.pathname}#order=${orderHash}`;
+    const qrDataUrl = generateQRDataUrl(orderUrl, 160);
+
+    const quoteData: QuoteData = {
+      ref,
+      date: new Date().toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" }),
+      productName,
+      volume: item.volume,
+      quantity,
+      unitPrice: formatNaira(unitPrice),
+      subtotal: formatNaira(subtotal),
+      deliveryState,
+      deliveryZone: zone ? `Zone ${zone.id} — ${zone.name}` : "",
+      deliveryEstimate,
+      branding,
+      total: totalDisplay,
+      qrDataUrl,
+    };
+    openPrintableQuote(quoteData);
   }
 
   function handleShare() {
@@ -368,13 +429,25 @@ export function OrderBuilder() {
               {productType === "custom" ? "Request Quote on WhatsApp" : "Order via WhatsApp"}
             </button>
 
-            <button
-              type="button"
-              onClick={handleShare}
-              className="w-full py-2.5 rounded-xl text-sm font-medium text-muted hover:text-heading border border-light-grey hover:border-teal transition-all cursor-pointer"
-            >
-              {copied ? "Link copied!" : "Share order link"}
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handlePrintQuote}
+                className="py-2.5 rounded-xl text-sm font-medium text-muted hover:text-heading border border-light-grey hover:border-teal transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print Quote
+              </button>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="py-2.5 rounded-xl text-sm font-medium text-muted hover:text-heading border border-light-grey hover:border-teal transition-all cursor-pointer"
+              >
+                {copied ? "Copied!" : "Share Link"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
