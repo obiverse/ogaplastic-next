@@ -68,8 +68,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('oga-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}})()`,
+          }}
+        />
         <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
         <meta name="theme-color" content="#0F3D47" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

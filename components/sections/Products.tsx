@@ -139,7 +139,7 @@ export function Products() {
                 width={400}
                 height={435}
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-contain drop-shadow-lg max-h-[400px] transition-transform duration-500 w-auto h-auto"
+                className="object-contain drop-shadow-lg max-h-[400px] max-w-full transition-transform duration-500"
                 style={data.imageRotate ? { transform: `rotate(${data.imageRotate}deg)` } : undefined}
               />
               <Chip

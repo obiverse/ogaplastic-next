@@ -164,7 +164,7 @@ export function Hero() {
                 width={500}
                 height={544}
                 sizes="(max-width: 768px) 0px, (max-width: 1024px) 40vw, 50vw"
-                className="relative z-10 drop-shadow-2xl hero-tank-float w-auto h-auto"
+                className="relative z-10 drop-shadow-2xl hero-tank-float max-w-full h-auto"
                 priority
               />
               {/* "Made in Nigeria" badge */}

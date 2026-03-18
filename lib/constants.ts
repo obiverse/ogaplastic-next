@@ -211,6 +211,7 @@ export const NAV_LINKS = [
   { label: "Technology", href: "#technology" },
   { label: "Industries", href: "#industries" },
   { label: "Pricing", href: "#pricing" },
+  { label: "FAQ", href: "#faq" },
   { label: "Contact", href: "#contact" },
 ] as const;
 
@@ -221,6 +222,7 @@ export const FOOTER_LINKS = {
     { label: "Products", href: "#products" },
     { label: "Technology", href: "#technology" },
     { label: "Pricing", href: "#pricing" },
+    { label: "FAQ", href: "#faq" },
     { label: "Contact", href: "#contact" },
   ],
   products: [
@@ -275,10 +277,9 @@ export const FAQS = [
 ] as const;
 
 export const SOCIALS = [
-  { name: "Facebook", icon: "F", href: "#" },
-  { name: "Instagram", icon: "I", href: "#" },
-  { name: "LinkedIn", icon: "L", href: "#" },
-  { name: "X", icon: "X", href: "#" },
+  { name: "WhatsApp", icon: "W", href: "https://wa.me/2348089155234" },
+  { name: "Email", icon: "E", href: "mailto:ogaplastic@gmail.com" },
+  { name: "Phone", icon: "P", href: "tel:+2348033585187" },
 ] as const;
 
 export function formatNaira(amount: number): string {

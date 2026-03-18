@@ -47,7 +47,7 @@ export function About() {
                   height={435}
                   sizes="(max-width: 1024px) 100vw, 400px"
                   loading="lazy"
-                  className="drop-shadow-2xl object-contain w-auto h-auto"
+                  className="drop-shadow-2xl object-contain max-w-full max-h-full"
                 />
               </div>
             </div>
