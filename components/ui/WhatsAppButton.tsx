@@ -27,9 +27,9 @@ const WA_ICON_SMALL = (
 // Exported for reuse in Pricing and other sections
 export { WA_ICON_SMALL };
 
-type ActiveSection = "hero" | "about" | "products" | "pricing" | "contact" | "other";
+type ActiveSection = "hero" | "about" | "products" | "pricing" | "faq" | "contact" | "other";
 
-const SECTIONS_TO_WATCH: ActiveSection[] = ["hero", "about", "products", "pricing", "contact"];
+const SECTIONS_TO_WATCH: ActiveSection[] = ["hero", "about", "products", "pricing", "faq", "contact"];
 
 function useActiveSection(): ActiveSection {
   const [section, setSection] = useState<ActiveSection>("hero");
@@ -66,6 +66,11 @@ function getMenuItems(section: ActiveSection) {
         { label: "Enquire about Products", url: buildWhatsAppUrl({ type: "product", product: "your products" }) },
         { label: "Support", url: buildWhatsAppUrl({ type: "general" }, "support") },
       ];
+    case "faq":
+      return [
+        { label: "Ask about Pricing & Delivery", url: buildWhatsAppUrl({ type: "general" }) },
+        { label: "Ask about Products", url: buildWhatsAppUrl({ type: "product", product: "your products" }) },
+      ];
     case "contact":
       return [
         { label: "Chat on WhatsApp", url: buildWhatsAppUrl({ type: "general" }) },
@@ -80,6 +85,7 @@ function getMenuItems(section: ActiveSection) {
 
 function getTooltip(section: ActiveSection): string | null {
   if (section === "pricing") return "Ready to order? Chat with us";
+  if (section === "faq") return "Have more questions? Chat with us";
   if (section === "contact") return "Chat on WhatsApp instead";
   return null;
 }
@@ -88,7 +94,7 @@ export function WhatsAppButton() {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const menuOpen = Boolean(anchorEl);
   const section = useActiveSection();
-  const showTooltip = section === "pricing" || section === "contact";
+  const showTooltip = section === "pricing" || section === "faq" || section === "contact";
 
   function handleClick(e: MouseEvent<HTMLElement>) {
     setAnchorEl(e.currentTarget);

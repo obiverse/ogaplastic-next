@@ -89,7 +89,7 @@ export function Hero() {
             <div>
               <span className="inline-flex items-center gap-2 bg-white/10 text-white/90 px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm border border-white/10">
                 <span className="w-2 h-2 rounded-full bg-logo-green animate-pulse" />
-                Proudly Nigerian Manufacturing
+                Trusted by 500+ Businesses Across Nigeria
               </span>
             </div>
 
@@ -146,9 +146,9 @@ export function Hero() {
 
             {/* Animated Stats */}
             <div className="flex gap-8 mt-12 pt-8 border-t border-white/20">
-              <AnimatedStat value={25} suffix="yr" label="UV Protection" delay={0} />
-              <AnimatedStat value={10000} suffix="L" label="Max Tank Capacity" delay={200} />
-              <AnimatedStat value={1000} suffix="L" label="Max Bin Size" delay={400} />
+              <AnimatedStat value={25} suffix="+" label="Years Experience" delay={0} />
+              <AnimatedStat value={50000} suffix="+" label="Tanks Delivered" delay={200} />
+              <AnimatedStat value={36} suffix="" label="States Covered" delay={400} />
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
@@ -19,8 +19,19 @@ const PRODUCT_OPTIONS = [
 ];
 
 export function Contact() {
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState<false | "whatsapp" | "email">(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [productValue, setProductValue] = useState("");
+
+  // Listen for product context from Products section
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const product = (e as CustomEvent).detail?.product;
+      if (product) setProductValue(product);
+    };
+    window.addEventListener("oga-quote-context", handler);
+    return () => window.removeEventListener("oga-quote-context", handler);
+  }, []);
 
   function validate(form: FormData): Record<string, string> {
     const errs: Record<string, string> = {};
@@ -33,45 +44,68 @@ export function Contact() {
     return errs;
   }
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const data = new FormData(e.currentTarget);
+  function getFormData() {
+    const form = document.querySelector<HTMLFormElement>("#contact form");
+    if (!form) return null;
+    const data = new FormData(form);
     const errs = validate(data);
     setErrors(errs);
-    if (Object.keys(errs).length > 0) return;
+    if (Object.keys(errs).length > 0) return null;
+    return {
+      name: data.get("name") as string,
+      company: data.get("company") as string,
+      email: data.get("email") as string,
+      phone: data.get("phone") as string,
+      product: data.get("product") as string,
+      quantity: data.get("quantity") as string,
+      message: data.get("message") as string,
+    };
+  }
 
-    const name = data.get("name") as string;
-    const company = data.get("company") as string;
-    const email = data.get("email") as string;
-    const phone = data.get("phone") as string;
-    const product = data.get("product") as string;
-    const quantity = data.get("quantity") as string;
-    const message = data.get("message") as string;
+  function handleWhatsApp() {
+    const d = getFormData();
+    if (!d) return;
+    window.open(
+      buildWhatsAppUrl({
+        type: "quote",
+        name: d.name,
+        product: d.product || "General Enquiry",
+        quantity: d.quantity || undefined,
+        details: d.message || undefined,
+      }),
+      "_blank"
+    );
+    setSubmitted("whatsapp");
+  }
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const d = getFormData();
+    if (!d) return;
 
     const subject = encodeURIComponent(
-      `Quote Request from ${name}${product ? ` — ${product}` : ""}`
+      `Quote Request from ${d.name}${d.product ? ` — ${d.product}` : ""}`
     );
     const body = encodeURIComponent(
       [
-        `Name: ${name}`,
-        company && `Company: ${company}`,
-        `Email: ${email}`,
-        `Phone: ${phone}`,
-        product && `Product Interest: ${product}`,
-        quantity && `Quantity: ${quantity}`,
-        message && `\nMessage:\n${message}`,
+        `Name: ${d.name}`,
+        d.company && `Company: ${d.company}`,
+        `Email: ${d.email}`,
+        `Phone: ${d.phone}`,
+        d.product && `Product Interest: ${d.product}`,
+        d.quantity && `Quantity: ${d.quantity}`,
+        d.message && `\nMessage:\n${d.message}`,
       ]
         .filter(Boolean)
         .join("\n")
     );
 
     window.location.href = `mailto:${COMPANY.email}?subject=${subject}&body=${body}`;
-    setSubmitted(true);
+    setSubmitted("email");
   }
 
   return (
     <section id="contact" className="relative py-24 bg-cream overflow-hidden">
-      {/* Canvas background */}
       <AnimatedCanvas
         skin={contactScene}
         className="absolute inset-0 z-0"
@@ -127,7 +161,6 @@ export function Contact() {
               </div>
             </div>
 
-            {/* Google Maps */}
             <div className="rounded-2xl overflow-hidden border border-light-grey h-[220px]">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63513.76!2d8.05!3d5.8!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x105d65a0b54dce1d%3A0x6e8aa5b8a42f1d!2sUgep%2C%20Cross%20River%20State%2C%20Nigeria!5e0!3m2!1sen!2sng!4v1700000000000!5m2!1sen!2sng"
@@ -149,14 +182,30 @@ export function Contact() {
                   </svg>
                 </div>
                 <h3 className="font-display text-2xl font-bold text-heading mb-2">
-                  Enquiry Sent!
+                  {submitted === "whatsapp" ? "Chat Started!" : "Enquiry Sent!"}
                 </h3>
                 <p className="text-grey">
-                  Your email client should open with the enquiry details.
-                  If it doesn&apos;t, email us directly at{" "}
-                  <a href={`mailto:${COMPANY.email}`} className="text-teal font-medium hover:underline">
-                    {COMPANY.email}
-                  </a>
+                  {submitted === "whatsapp" ? (
+                    <>Our sales team will respond within 2 hours. Check your WhatsApp for the conversation.</>
+                  ) : (
+                    <>
+                      Your email client should open with the enquiry details.
+                      If it doesn&apos;t, email us directly at{" "}
+                      <a href={`mailto:${COMPANY.email}`} className="text-teal font-medium hover:underline">
+                        {COMPANY.email}
+                      </a>{" "}
+                      or{" "}
+                      <a
+                        href={buildWhatsAppUrl({ type: "general" })}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium hover:underline"
+                        style={{ color: "#25D366" }}
+                      >
+                        chat on WhatsApp
+                      </a>
+                    </>
+                  )}
                 </p>
               </div>
             ) : (
@@ -208,7 +257,8 @@ export function Contact() {
                     label="Product Interest"
                     select
                     fullWidth
-                    defaultValue=""
+                    value={productValue}
+                    onChange={(e) => setProductValue(e.target.value)}
                   >
                     {PRODUCT_OPTIONS.map((opt) => (
                       <MenuItem key={opt.value} value={opt.value}>
@@ -233,50 +283,19 @@ export function Contact() {
                   fullWidth
                 />
 
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  fullWidth
-                  endIcon={
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  }
-                  sx={{ py: 1.75, fontSize: "1rem" }}
-                >
-                  Send Enquiry
-                </Button>
+                {/* Response time badge */}
+                <div className="flex items-center gap-2 text-sm text-grey py-1">
+                  <span className="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" style={{ backgroundColor: "#25D366" }} />
+                  We typically respond within 2 hours on WhatsApp
+                </div>
 
+                {/* WhatsApp — PRIMARY */}
                 <Button
                   type="button"
-                  variant="outlined"
+                  variant="contained"
                   size="large"
                   fullWidth
-                  onClick={() => {
-                    const form = document.querySelector<HTMLFormElement>("#contact form");
-                    if (!form) return;
-                    const data = new FormData(form);
-                    const errs = validate(data);
-                    setErrors(errs);
-                    if (Object.keys(errs).length > 0) return;
-                    const name = data.get("name") as string;
-                    const product = (data.get("product") as string) || "General Enquiry";
-                    const quantity = data.get("quantity") as string;
-                    const message = data.get("message") as string;
-                    window.open(
-                      buildWhatsAppUrl({
-                        type: "quote",
-                        name,
-                        product,
-                        quantity: quantity || undefined,
-                        details: message || undefined,
-                      }),
-                      "_blank"
-                    );
-                    setSubmitted(true);
-                  }}
+                  onClick={handleWhatsApp}
                   startIcon={
                     <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
@@ -286,12 +305,28 @@ export function Contact() {
                   sx={{
                     py: 1.75,
                     fontSize: "1rem",
-                    borderColor: "#25D366",
-                    color: "#25D366",
-                    "&:hover": { borderColor: "#20BD5A", bgcolor: "rgba(37,211,102,0.05)" },
+                    bgcolor: "#25D366",
+                    color: "#fff",
+                    "&:hover": { bgcolor: "#20BD5A" },
                   }}
                 >
-                  Or send via WhatsApp
+                  Send via WhatsApp
+                </Button>
+
+                {/* Email — secondary */}
+                <Button
+                  type="submit"
+                  variant="outlined"
+                  size="large"
+                  fullWidth
+                  endIcon={
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  }
+                  sx={{ py: 1.75, fontSize: "1rem" }}
+                >
+                  Send via Email
                 </Button>
               </form>
             )}

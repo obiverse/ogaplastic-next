@@ -282,6 +282,38 @@ export const SOCIALS = [
   { name: "Phone", icon: "P", href: "tel:+2348033585187" },
 ] as const;
 
+export const COMMERCIAL_FAQS = [
+  {
+    question: "What payment methods do you accept?",
+    answer:
+      "We accept bank transfer (all Nigerian banks), cash on delivery for local orders, and government purchase orders for institutional buyers. Payment terms are available for bulk orders.",
+    cta: { label: "Chat with sales about payment", type: "whatsapp" as const },
+  },
+  {
+    question: "How much does delivery cost?",
+    answer:
+      "All listed prices are ex-factory (Ugep, Cross River State). Delivery cost depends on your location and order size. We deliver nationwide across Nigeria and can arrange transport to any African destination.",
+    cta: { label: "Get a delivery quote", type: "whatsapp" as const },
+  },
+  {
+    question: "Do you offer bulk discounts?",
+    answer:
+      "Yes. Orders of 10+ units receive volume pricing. Government and institutional buyers ordering 50+ units benefit from our partnership pricing. Contact our sales team for a custom quotation.",
+    cta: { label: "Request bulk pricing", type: "whatsapp" as const },
+  },
+  {
+    question: "What is the production lead time?",
+    answer:
+      "Standard products (tanks and bins in stock colours) ship within 3\u20137 working days. Custom-branded and bespoke products require 2\u20134 weeks depending on specification and quantity.",
+    cta: { label: "Check current availability", type: "whatsapp" as const },
+  },
+  {
+    question: "What warranty do your products carry?",
+    answer:
+      "Water tanks carry a 25-year UV and structural warranty. Waste bins carry a 10-year structural warranty. All products are guaranteed against manufacturing defects. Warranty covers normal outdoor use in Nigerian climate conditions.",
+  },
+] as const;
+
 export function formatNaira(amount: number): string {
   return "₦" + amount.toLocaleString("en-NG");
 }
