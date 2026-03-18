@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 import { LogoIcon } from "./Logo";
 
 export function PortalModal({
@@ -10,33 +14,24 @@ export function PortalModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    const el = dialogRef.current;
-    if (!el) return;
-    if (open && !el.open) el.showModal();
-    else if (!open && el.open) el.close();
-  }, [open]);
-
   return (
-    <dialog
-      ref={dialogRef}
-      className="backdrop:bg-black/50 bg-transparent p-0 m-auto rounded-2xl"
-      onClose={onClose}
-    >
-      <div className="bg-white rounded-2xl p-10 max-w-md text-center relative">
-        <button
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogContent>
+        <IconButton
           onClick={onClose}
-          className="absolute top-4 right-4 text-grey hover:text-charcoal text-2xl leading-none cursor-pointer"
           aria-label="Close modal"
+          sx={{ position: "absolute", top: 12, right: 12 }}
         >
-          &times;
-        </button>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </IconButton>
+
         <div className="flex justify-center mb-6">
           <LogoIcon size={64} />
         </div>
-        <h3 className="font-display text-2xl font-bold text-teal-deep mb-2">
+
+        <h3 className="font-display text-2xl font-bold text-heading mb-2">
           Distributor &amp; Admin Portal
         </h3>
         <p className="text-lg font-semibold text-gold mb-3">Coming Soon</p>
@@ -45,15 +40,19 @@ export function PortalModal({
           administrators. Features will include leads management, quote
           generation, inventory tracking, and more.
         </p>
+
         <div className="flex gap-3">
-          <input
+          <TextField
             type="email"
-            placeholder="Your email for updates"
-            className="flex-1 border border-light-grey rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal"
+            label="Email for updates"
+            size="small"
+            fullWidth
           />
-          <button className="btn-gold text-sm !px-5 !py-3 cursor-pointer">Notify Me</button>
+          <Button variant="contained" color="primary" sx={{ whiteSpace: "nowrap" }}>
+            Notify Me
+          </Button>
         </div>
-      </div>
-    </dialog>
+      </DialogContent>
+    </Dialog>
   );
 }

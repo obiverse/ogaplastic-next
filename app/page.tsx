@@ -9,15 +9,25 @@ import { Industries } from "@/components/sections/Industries";
 import { Sustainability } from "@/components/sections/Sustainability";
 import { Pricing } from "@/components/sections/Pricing";
 import { Specifications } from "@/components/sections/Specifications";
+import { FAQ } from "@/components/sections/FAQ";
 import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/sections/Footer";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { PWAInstallPrompt } from "@/components/ui/PWAInstallPrompt";
+import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 
 export default function Home() {
   return (
     <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-teal-deep focus:text-white focus:rounded-lg focus:text-sm focus:font-medium"
+      >
+        Skip to main content
+      </a>
       <LoadingScreen />
       <Navbar />
-      <main>
+      <main id="main-content">
         <Hero />
         <About />
         <Products />
@@ -26,9 +36,13 @@ export default function Home() {
         <Sustainability />
         <Pricing />
         <Specifications />
+        <FAQ />
         <Contact />
       </main>
       <Footer />
+      <WhatsAppButton />
+      <PWAInstallPrompt />
+      <OfflineIndicator />
       <ScrollReveal />
     </>
   );

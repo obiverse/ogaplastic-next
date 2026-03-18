@@ -1,5 +1,13 @@
+"use client";
+
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
 import { SectionTag } from "@/components/ui/SectionTag";
 import { INDUSTRIES } from "@/lib/constants";
+import { AnimatedCanvas } from "@/components/canvas/AnimatedCanvas";
+import { industriesScene } from "@/components/canvas/scenes/industries-scene";
 
 const ICONS = [
   // Government
@@ -17,41 +25,137 @@ const ICONS = [
 ];
 
 export function Industries() {
+  const heroIndustries = INDUSTRIES.slice(0, 2);
+  const standardIndustries = INDUSTRIES.slice(2);
+
   return (
-    <section id="industries" className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="industries" className="relative py-24 bg-surface overflow-hidden">
+      {/* Canvas background */}
+      <AnimatedCanvas
+        skin={industriesScene}
+        className="absolute inset-0 z-0"
+        tickRate={1}
+      />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16 reveal">
           <SectionTag>WHO WE SERVE</SectionTag>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-teal-deep">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-heading">
             Trusted Across{" "}
             <em className="italic font-normal text-teal">Every Sector</em>
           </h2>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {INDUSTRIES.map((industry, i) => (
-            <div
+        {/* Hero cards — Government + Construction (2-col) */}
+        <div className="grid md:grid-cols-2 gap-6 mb-6 reveal">
+          {heroIndustries.map((industry, i) => (
+            <Card
               key={industry.title}
-              className="reveal card-hover bg-sand-light rounded-2xl p-7 border border-light-grey"
+              className="stagger-child"
+              sx={{
+                borderLeft: "4px solid",
+                borderLeftColor: "primary.main",
+              }}
             >
-              <div className="w-12 h-12 rounded-xl bg-teal/10 flex items-center justify-center mb-4">
-                <svg
-                  className="w-6 h-6 text-teal"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  {ICONS[i]}
-                </svg>
-              </div>
-              <h3 className="font-display text-lg font-bold text-teal-deep mb-2">
-                {industry.title}
-              </h3>
-              <p className="text-grey text-sm leading-relaxed">
-                {industry.description}
-              </p>
-            </div>
+              <CardContent sx={{ p: 4 }}>
+                <div className="flex items-start gap-5">
+                  <div className="w-16 h-16 rounded-xl bg-teal/10 flex items-center justify-center flex-shrink-0">
+                    <svg
+                      className="w-8 h-8 text-teal"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      {ICONS[i]}
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="font-display text-xl font-bold text-heading">
+                        {industry.title}
+                      </h3>
+                      <Chip
+                        label={industry.metric}
+                        size="small"
+                        sx={{
+                          bgcolor: "primary.main",
+                          color: "#fff",
+                          fontWeight: 700,
+                          fontSize: "0.7rem",
+                        }}
+                      />
+                    </div>
+                    <p className="text-muted text-sm leading-relaxed mt-2">
+                      {industry.description}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           ))}
+        </div>
+
+        {/* Standard cards — 4-col grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 reveal">
+          {standardIndustries.map((industry, i) => (
+            <Card
+              key={industry.title}
+              className="stagger-child"
+              style={{ animationDelay: `${(i + 2) * 0.08}s` }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <div className="w-12 h-12 rounded-xl bg-teal/10 flex items-center justify-center mb-4">
+                  <svg
+                    className="w-6 h-6 text-teal"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    {ICONS[i + 2]}
+                  </svg>
+                </div>
+                <h3 className="font-display text-lg font-bold text-heading mb-1">
+                  {industry.title}
+                </h3>
+                <p className="text-muted text-sm leading-relaxed mb-3">
+                  {industry.description}
+                </p>
+                <Chip
+                  label={industry.metric}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    borderColor: "primary.main",
+                    color: "primary.main",
+                    fontWeight: 600,
+                    fontSize: "0.7rem",
+                  }}
+                />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="text-center mt-12 reveal">
+          <Button
+            variant="contained"
+            color="primary"
+            href="#contact"
+            size="large"
+            endIcon={
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            }
+          >
+            Get Industry-Specific Quote
+          </Button>
         </div>
       </div>
     </section>

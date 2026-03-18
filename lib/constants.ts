@@ -6,15 +6,15 @@ export const COMPANY = {
   rc: "8025085",
   tin: "32372196-0001",
   address: "№1, Lokpema Road, Along Ediba Road, Ugep, Cross River State, Nigeria",
-  phones: ["+234(0)8089155234", "+234(0)7070201435"],
+  phones: ["+234(0)8033585187", "+234(0)8089155234"],
   email: "ogaplastic@gmail.com",
   mission:
     "To manufacture and supply high-quality, durable plastic products using advanced technology and skilled expertise, while maintaining affordability, reliability, and customer satisfaction.",
   vision:
     "To become a leading plastic manufacturing company in Africa, delivering world-class plastic solutions that support infrastructure development, environmental sustainability, and economic growth across the continent.",
-  tagline: "Quality plastic solutions engineered for Africa",
+  tagline: "Quality plastic solutions across Nigeria and Africa",
   description:
-    "OGA PLASTIC is a Nigerian industrial plastic manufacturing company producing durable water storage tanks, waste bins, and custom plastic infrastructure products using rotational moulding technology. Products are engineered for Africa's climate conditions with UV-stabilised, food-grade materials and minimum 8–10 year lifespans.",
+    "OGA PLASTIC is a Nigerian industrial plastic manufacturing company producing durable water storage tanks, waste bins, and custom plastic infrastructure products using rotational moulding technology. Products are engineered for Africa's climate conditions with UV-stabilised, food-grade materials and minimum 25-year lifespans.",
 } as const;
 
 export const VALUES = [
@@ -47,6 +47,7 @@ export const TANK_PRICES = [
   { volume: "3000L", type: "Vertical", price: 220000 },
   { volume: "4000L", type: "Vertical", price: 290000 },
   { volume: "5000L", type: "Vertical", price: 375000 },
+  { volume: "10000L", type: "Vertical", price: 680000 },
 ] as const;
 
 export const BIN_PRICES = [
@@ -59,9 +60,9 @@ export const BIN_PRICES = [
 
 export const TANK_FEATURES = [
   {
-    title: "Triple-Layer Build",
+    title: "Double-Layer Build",
     description:
-      "Inner white layer for visibility, UV-stabilised core, weather-resistant outer shell",
+      "Inner white food-grade layer for visibility, UV-stabilised outer shell for weather resistance",
   },
   {
     title: "Food-Grade Material",
@@ -70,7 +71,7 @@ export const TANK_FEATURES = [
   {
     title: "UV Protection",
     description:
-      "Stabilised for 8–10 years under intense Nigerian tropical sun",
+      "Stabilised for 25 years under intense Nigerian tropical sun",
   },
   {
     title: "Custom Branding",
@@ -121,28 +122,34 @@ export const INDUSTRIES = [
     title: "Government Agencies",
     description:
       "Bulk procurement for public infrastructure, water storage, waste management",
+    metric: "36 States",
   },
   {
     title: "Construction Firms",
     description:
       "Site water storage, temporary and permanent installations",
+    metric: "500+ Sites",
   },
   {
     title: "Agricultural Enterprises",
     description: "Water storage for farms and irrigation support",
+    metric: "10,000+ Farms",
   },
   {
     title: "Commercial Developers",
     description: "Estate-wide water and waste solutions",
+    metric: "200+ Estates",
   },
   {
     title: "Residential Estates",
     description: "Domestic water tanks and community bins",
+    metric: "50,000+ Homes",
   },
   {
     title: "Institutions",
     description:
       "Schools, hospitals, churches, mosques — durable utility products",
+    metric: "300+ Served",
   },
 ] as const;
 
@@ -150,12 +157,12 @@ export const SPECIFICATIONS = [
   {
     title: "Tank Configuration",
     description:
-      "Vertical, up to 5000L, integrated moulded support cradles (3–4 legs)",
+      "Vertical, up to 10,000L, integrated moulded support cradles (3–4 legs)",
   },
   {
     title: "Material & Build",
     description:
-      "Food-grade LLDPE/HDPE, rotomoulding, industrial wall thickness, UV 8–10yr",
+      "Food-grade LLDPE/HDPE, rotomoulding, industrial wall thickness, UV 25yr",
   },
   {
     title: "Colour & Branding",
@@ -223,6 +230,56 @@ export const FOOTER_LINKS = {
     { label: "Request Quote", href: "#contact" },
   ],
 } as const;
+
+export const FAQS = [
+  {
+    question: "What sizes of water tanks do you offer?",
+    answer:
+      "We manufacture vertical water storage tanks from 750 litres up to 10,000 litres. All sizes feature our double-layer construction with UV-stabilised, food-grade materials. Custom sizes are available on request.",
+  },
+  {
+    question: "How long do your tanks last?",
+    answer:
+      "Our tanks are engineered for a minimum 25-year lifespan under Nigeria's intense tropical sun. The UV-stabilised outer shell protects against degradation, while the seamless rotomoulded construction prevents cracks and leaks.",
+  },
+  {
+    question: "Are your products safe for drinking water?",
+    answer:
+      "Yes. Our water tanks use food-grade LLDPE/HDPE materials with an inner white layer certified safe for potable water storage. The white interior also makes it easy to monitor water levels and cleanliness.",
+  },
+  {
+    question: "Can you add our company logo to the tanks?",
+    answer:
+      "Absolutely. We offer in-mould branding (permanent, moulded into the product) and UV-resistant screen printing. Government tagging, batch numbers, and 'Property of' markings are also available.",
+  },
+  {
+    question: "Do you deliver nationwide?",
+    answer:
+      "We deliver across Nigeria and Africa from our factory in Ugep, Cross River State. Prices shown are ex-factory. Delivery costs depend on location and order size — contact us for a delivery quote.",
+  },
+  {
+    question: "What is the minimum order quantity?",
+    answer:
+      "There is no minimum order for standard products — you can order a single tank or bin. For custom-branded or bespoke products, minimum quantities may apply depending on the specification. Contact us to discuss your needs.",
+  },
+  {
+    question: "Do you offer waste bins for municipalities?",
+    answer:
+      "Yes. Our rotomoulded waste bins range from 50L residential bins to 1,000L industrial containers. They are built for outdoor use, UV-resistant, and available in custom colours for municipal branding and recycling programmes.",
+  },
+  {
+    question: "How do I request a quote?",
+    answer:
+      "Use the contact form on this page, call us directly, or send us a WhatsApp message. We respond to all enquiries within 24 hours with detailed pricing and delivery information.",
+  },
+] as const;
+
+export const SOCIALS = [
+  { name: "Facebook", icon: "F", href: "#" },
+  { name: "Instagram", icon: "I", href: "#" },
+  { name: "LinkedIn", icon: "L", href: "#" },
+  { name: "X", icon: "X", href: "#" },
+] as const;
 
 export function formatNaira(amount: number): string {
   return "₦" + amount.toLocaleString("en-NG");

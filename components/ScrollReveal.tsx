@@ -8,7 +8,7 @@ export function ScrollReveal() {
       "(prefers-reduced-motion: reduce)"
     ).matches;
     if (prefersReduced) {
-      document.querySelectorAll(".reveal").forEach((el) => {
+      document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-scale").forEach((el) => {
         el.classList.add("visible");
       });
       return;
@@ -25,7 +25,7 @@ export function ScrollReveal() {
       { threshold: 0.1 }
     );
 
-    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+    document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-scale").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 

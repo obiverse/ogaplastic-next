@@ -9,12 +9,14 @@ export function LoadingScreen() {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setHidden(true), 1500);
+    const timer = setTimeout(() => setHidden(true), 600);
     return () => clearTimeout(timer);
   }, []);
 
+  if (hidden) return null;
+
   return (
-    <div className={`loading-screen ${hidden ? "hidden" : ""}`}>
+    <div className="loading-screen" aria-hidden="true" role="presentation">
       {/* Canvas for spinning arc + progress bar */}
       <AnimatedCanvas
         skin={loadingScene}
@@ -25,7 +27,7 @@ export function LoadingScreen() {
 
       {/* Logo + text overlaid on canvas */}
       <div className="loading-logo relative z-10">
-        <LogoMonoWhite size={72} />
+        <LogoMonoWhite size={72} priority={false} />
       </div>
       <div className="text-white/80 text-sm font-medium mt-4 tracking-widest uppercase relative z-10">
         OGA PLASTIC

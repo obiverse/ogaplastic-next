@@ -1,5 +1,5 @@
 import { LogoFull } from "@/components/ui/Logo";
-import { COMPANY, FOOTER_LINKS } from "@/lib/constants";
+import { COMPANY, FOOTER_LINKS, SOCIALS } from "@/lib/constants";
 
 export function Footer() {
   return (
@@ -9,18 +9,20 @@ export function Footer() {
           {/* Brand column */}
           <div>
             <LogoFull variant="light" />
-            <p className="text-white/50 text-sm mt-4 leading-relaxed">
+            <p className="text-white/70 text-sm mt-4 leading-relaxed">
               {COMPANY.tagline}
             </p>
             <div className="flex gap-3 mt-6">
-              {["Facebook", "Instagram", "LinkedIn", "X"].map((name) => (
-                <span
-                  key={name}
-                  className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-white/50 hover:bg-white/20 hover:text-white transition-colors text-xs cursor-pointer"
-                  title={name}
+              {SOCIALS.map((s) => (
+                <a
+                  key={s.name}
+                  href={s.href}
+                  title={s.name}
+                  aria-label={s.name}
+                  className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-white/70 hover:bg-white/20 hover:text-white transition-colors text-xs"
                 >
-                  {name[0]}
-                </span>
+                  {s.icon}
+                </a>
               ))}
             </div>
           </div>
@@ -35,7 +37,7 @@ export function Footer() {
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-white/50 hover:text-white text-sm transition-colors"
+                    className="text-white/70 hover:text-white text-sm transition-colors"
                   >
                     {link.label}
                   </a>
@@ -52,7 +54,7 @@ export function Footer() {
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-white/50 hover:text-white text-sm transition-colors"
+                    className="text-white/70 hover:text-white text-sm transition-colors"
                   >
                     {link.label}
                   </a>
@@ -64,18 +66,26 @@ export function Footer() {
           {/* Contact */}
           <div>
             <h4 className="text-white font-semibold text-sm mb-4">Contact</h4>
-            <div className="space-y-3 text-white/50 text-sm">
+            <div className="space-y-3 text-white/70 text-sm">
               <p>{COMPANY.address}</p>
               {COMPANY.phones.map((p) => (
-                <p key={p}>{p}</p>
+                <p key={p}>
+                  <a href={`tel:${p.replace(/[() ]/g, "")}`} className="hover:text-white transition-colors">
+                    {p}
+                  </a>
+                </p>
               ))}
-              <p>{COMPANY.email}</p>
+              <p>
+                <a href={`mailto:${COMPANY.email}`} className="hover:text-white transition-colors">
+                  {COMPANY.email}
+                </a>
+              </p>
             </div>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-white/30 text-xs">
+        <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-white/70 text-xs">
           <span>
             &copy; 2026 {COMPANY.name}. All rights reserved.
           </span>

@@ -1,5 +1,10 @@
+"use client";
+
 import Image from "next/image";
+import { asset } from "@/lib/basepath";
 import { SectionTag } from "@/components/ui/SectionTag";
+import { AnimatedCanvas } from "@/components/canvas/AnimatedCanvas";
+import { specsScene } from "@/components/canvas/scenes/specs-scene";
 import { SPECIFICATIONS } from "@/lib/constants";
 
 const SPEC_ICONS = [
@@ -23,11 +28,18 @@ const SPEC_ICONS = [
 
 export function Specifications() {
   return (
-    <section id="specifications" className="py-24 bg-sand-light">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="specifications" className="relative py-24 bg-sand-light overflow-hidden">
+      {/* Canvas background */}
+      <AnimatedCanvas
+        skin={specsScene}
+        className="absolute inset-0 z-0"
+        tickRate={1}
+      />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16 reveal">
           <SectionTag>TECHNICAL DETAIL</SectionTag>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-teal-deep">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-heading">
             Custom Water Tank{" "}
             <em className="italic font-normal text-teal">Specifications</em>
           </h2>
@@ -37,7 +49,7 @@ export function Specifications() {
           {SPECIFICATIONS.map((spec, i) => (
             <div
               key={spec.title}
-              className="reveal card-hover bg-white rounded-2xl p-6 border border-light-grey"
+              className="reveal card-hover bg-surface-card rounded-2xl p-6 border border-light-grey"
             >
               <div className="w-11 h-11 rounded-xl bg-teal/10 flex items-center justify-center mb-4">
                 <svg
@@ -57,9 +69,9 @@ export function Specifications() {
                   )}
                 </svg>
               </div>
-              <h4 className="font-semibold text-teal-deep text-sm mb-2">
+              <h3 className="font-semibold text-heading text-sm mb-2">
                 {spec.title}
-              </h4>
+              </h3>
               <p className="text-grey text-xs leading-relaxed">
                 {spec.description}
               </p>
@@ -68,19 +80,21 @@ export function Specifications() {
         </div>
 
         {/* Mould reference image */}
-        <div className="reveal flex justify-center">
-          <div className="bg-white rounded-2xl p-6 border border-light-grey inline-flex items-center gap-6 max-w-2xl">
+        <div className="reveal-scale flex justify-center">
+          <div className="bg-surface-card rounded-2xl p-6 border border-light-grey inline-flex items-center gap-6 max-w-2xl">
             <Image
-              src="/images/tank-top-cover.png"
+              src={asset("/images/tank-top-cover.png")}
               alt="OGA PLASTIC tank threaded lid close-up"
               width={180}
               height={135}
+              sizes="180px"
+              loading="lazy"
               className="rounded-xl object-cover"
             />
             <div>
-              <h4 className="font-display text-lg font-bold text-teal-deep mb-2">
+              <h3 className="font-display text-lg font-bold text-heading mb-2">
                 Precision Fittings
-              </h4>
+              </h3>
               <p className="text-grey text-sm leading-relaxed">
                 Every tank features a threaded manhole cover with tight seal,
                 precision-moulded outlet ports, and overflow protection — all

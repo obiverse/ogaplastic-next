@@ -1,18 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "export",
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || "",
+  trailingSlash: true,
   reactCompiler: true,
-  turbopack: {},
-  async headers() {
-    return [
-      {
-        source: "/wasm/:path*",
-        headers: [
-          { key: "Content-Type", value: "application/wasm" },
-        ],
-      },
-    ];
-  },
+  images: { unoptimized: true },
 };
 
 export default nextConfig;

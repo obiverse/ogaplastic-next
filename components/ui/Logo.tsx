@@ -1,22 +1,25 @@
 import Image from "next/image";
+import { asset } from "@/lib/basepath";
 
 /** OGA PLASTIC logo — uses the actual brochure icon (hand holding gear). */
 export function LogoIcon({
   className = "",
   size = 48,
+  priority = true,
 }: {
   className?: string;
   size?: number;
+  priority?: boolean;
 }) {
   return (
     <Image
-      src="/images/logo-icon.png"
+      src={asset("/images/logo-icon.png")}
       alt="OGA PLASTIC logo"
       width={size}
       height={size}
       className={className}
-      style={{ objectFit: "contain" }}
-      priority
+      style={{ objectFit: "contain", maxWidth: size, maxHeight: size }}
+      priority={priority}
     />
   );
 }
@@ -25,13 +28,15 @@ export function LogoIcon({
 export function LogoMonoWhite({
   className = "",
   size = 48,
+  priority = true,
 }: {
   className?: string;
   size?: number;
+  priority?: boolean;
 }) {
   return (
     <Image
-      src="/images/logo-icon.png"
+      src={asset("/images/logo-icon.png")}
       alt="OGA PLASTIC logo"
       width={size}
       height={size}
@@ -39,8 +44,10 @@ export function LogoMonoWhite({
       style={{
         objectFit: "contain",
         filter: "brightness(0) invert(1)",
+        maxWidth: size,
+        maxHeight: size,
       }}
-      priority
+      priority={priority}
     />
   );
 }

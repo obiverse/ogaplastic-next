@@ -11,7 +11,7 @@ const FEATURES = [
   },
   {
     title: "Long-Life Products",
-    description: "Engineered to last 8–10+ years, reducing replacement waste and the environmental impact of plastic manufacturing.",
+    description: "Tanks engineered for 25+ years, bins for 10+ years — reducing replacement waste and the environmental impact of plastic manufacturing.",
   },
 ];
 

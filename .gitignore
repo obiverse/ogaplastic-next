@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -20,22 +18,45 @@
 # production
 /build
 
-# misc
+# OS
 .DS_Store
-*.pem
+Thumbs.db
+._*
 
-# debug
+# editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# secrets & credentials — NEVER commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cert
+*.jks
+credentials.json
+service-account*.json
+secrets/
+
+# debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-
 # vercel
 .vercel
 
-# typescript
+# claude / AI
+.claude/
+
+# typescript build
 *.tsbuildinfo
 next-env.d.ts

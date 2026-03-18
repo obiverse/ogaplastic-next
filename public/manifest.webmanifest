@@ -1,0 +1,25 @@
+{
+  "name": "OGA PLASTIC Manufacturing Nigeria Limited",
+  "short_name": "OGA PLASTIC",
+  "description": "Water Tanks & Waste Bins engineered for Africa",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0F3D47",
+  "theme_color": "#0F3D47",
+  "orientation": "any",
+  "categories": ["business", "shopping"],
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

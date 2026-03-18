@@ -87,6 +87,24 @@ export const easeOut = (t: number): number => 1 - Math.pow(1 - t, 3);
 /** Smooth step (Hermite interpolation) */
 export const smoothStep = (t: number): number => t * t * (3 - 2 * t);
 
+// ── Theme-aware color helper ────────────────────────────────
+
+/** Read a CSS custom property value at runtime (for canvas scenes on themed surfaces) */
+export function getThemedColor(varName: string, fallback: string): string {
+  if (typeof window === "undefined") return fallback;
+  return (
+    getComputedStyle(document.documentElement)
+      .getPropertyValue(varName)
+      .trim() || fallback
+  );
+}
+
+/** Check if dark mode is active (for canvas scenes on themed sections) */
+export function isDarkMode(): boolean {
+  if (typeof window === "undefined") return false;
+  return document.documentElement.getAttribute("data-theme") === "dark";
+}
+
 // ── Brand Colors (for canvas — CSS vars unavailable) ────────
 
 export const BRAND = {
