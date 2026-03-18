@@ -126,9 +126,12 @@ export function Hero() {
                   />
                 </svg>
               </a>
-              <a href="#contact" className="btn-outline">
-                Request a Quote
-              </a>
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent("oga-open-order-builder", { detail: {} }))}
+                className="btn-outline"
+              >
+                Order Now
+              </button>
               <a
                 href={buildWhatsAppUrl({ type: "general" })}
                 target="_blank"

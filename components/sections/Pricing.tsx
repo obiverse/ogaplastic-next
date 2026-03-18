@@ -206,6 +206,24 @@ function PriceCard({
               Order {quantity}x {item.volume} via WhatsApp
             </a>
 
+            <button
+              type="button"
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent("oga-open-order-builder", {
+                    detail: {
+                      product: productName === "Water Tank" ? "tank" : "bin",
+                      volumeIndex: selected,
+                      quantity,
+                    },
+                  })
+                )
+              }
+              className="w-full py-2.5 mt-2 rounded-xl text-sm font-medium text-white/60 hover:text-white border border-white/10 hover:border-white/30 transition-all cursor-pointer"
+            >
+              Configure full order + delivery estimate
+            </button>
+
             <p className="text-center text-white/40 text-xs mt-3">
               Per unit, ex-factory
             </p>

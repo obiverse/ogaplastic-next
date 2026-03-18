@@ -1,20 +1,36 @@
 // WhatsApp conversion funnel — context-aware URL builder
+// ──────────────────────────────────────────────────────
+// Configure lines here. Each line has a name and number.
+// The first line in the list is the default for sales.
 
-const SALES_NUMBER = "2348089155234";
-const SUPPORT_NUMBER = "2347070201435";
+export interface WhatsAppLine {
+  name: string;
+  number: string; // International format, digits only (e.g. "2348033585187")
+}
+
+export const WHATSAPP_LINES: WhatsAppLine[] = [
+  { name: "sales", number: "2348033585187" },
+  { name: "support", number: "2348089155234" },
+];
+
+function getLine(name: string): string {
+  const line = WHATSAPP_LINES.find((l) => l.name === name);
+  return line?.number ?? WHATSAPP_LINES[0].number;
+}
 
 export type WhatsAppContext =
   | { type: "general" }
   | { type: "product"; product: string; volume?: string }
   | { type: "quote"; name: string; product: string; quantity?: string; details?: string }
   | { type: "pricing"; product: string; volume: string; price: string }
-  | { type: "order"; product: string; volume: string; quantity: number; unitPrice: number; total: number };
+  | { type: "order"; product: string; volume: string; quantity: number; unitPrice: number; total: number }
+  | { type: "catalog-order"; ref: string; product: string; volume: string; quantity: number; unitPrice: number; subtotal: number; deliveryZone?: string; deliveryEstimate?: string; branding: boolean; total: string };
 
 export function buildWhatsAppUrl(
   context: WhatsAppContext,
-  line: "sales" | "support" = "sales"
+  line: string = "sales"
 ): string {
-  const number = line === "sales" ? SALES_NUMBER : SUPPORT_NUMBER;
+  const number = getLine(line);
   const text = buildMessage(context);
   return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
 }
@@ -56,8 +72,31 @@ function buildMessage(ctx: WhatsAppContext): string {
         ``,
         `Please confirm availability and delivery cost to my location.`,
       ].join("\n");
+    case "catalog-order":
+      return [
+        `ORDER ${ctx.ref}`,
+        `========================`,
+        `Product: ${ctx.product}`,
+        `Size: ${ctx.volume}`,
+        `Qty: ${ctx.quantity} x ${formatPrice(ctx.unitPrice)}`,
+        `Subtotal: ${formatPrice(ctx.subtotal)}`,
+        ``,
+        ctx.deliveryZone ? `Delivery: ${ctx.deliveryZone}` : "",
+        ctx.deliveryEstimate ? `Est. delivery: ${ctx.deliveryEstimate}` : "",
+        ctx.branding ? `Branding: Yes (custom)` : "",
+        ``,
+        `ESTIMATED TOTAL: ${ctx.total}`,
+        `========================`,
+        `Prices are ex-factory. Delivery`,
+        `estimate to be confirmed.`,
+        ``,
+        `Reply YES to confirm this order.`,
+      ]
+        .filter(Boolean)
+        .join("\n");
   }
 }
 
-// Re-export for use in WhatsAppButton
-export { SALES_NUMBER, SUPPORT_NUMBER };
+// Legacy aliases for backward compatibility
+export const SALES_NUMBER = getLine("sales");
+export const SUPPORT_NUMBER = getLine("support");

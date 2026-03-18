@@ -13,6 +13,7 @@ import { FAQ } from "@/components/sections/FAQ";
 import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/sections/Footer";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { OrderBuilder } from "@/components/order/OrderBuilder";
 import { PWAInstallPrompt } from "@/components/ui/PWAInstallPrompt";
 import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 
@@ -41,6 +42,7 @@ export default function Home() {
       </main>
       <Footer />
       <WhatsAppButton />
+      <OrderBuilder />
       <PWAInstallPrompt />
       <OfflineIndicator />
       <ScrollReveal />

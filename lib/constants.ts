@@ -277,10 +277,29 @@ export const FAQS = [
 ] as const;
 
 export const SOCIALS = [
-  { name: "WhatsApp", icon: "W", href: "https://wa.me/2348089155234" },
+  { name: "WhatsApp", icon: "W", href: "https://wa.me/2348033585187" },
   { name: "Email", icon: "E", href: "mailto:ogaplastic@gmail.com" },
   { name: "Phone", icon: "P", href: "tel:+2348033585187" },
 ] as const;
+
+// Approximate physical dimensions for canvas visualization
+export const TANK_DIMENSIONS: Record<string, { heightCm: number; diameterCm: number }> = {
+  "750L": { heightCm: 100, diameterCm: 90 },
+  "1000L": { heightCm: 110, diameterCm: 100 },
+  "2000L": { heightCm: 140, diameterCm: 120 },
+  "3000L": { heightCm: 160, diameterCm: 135 },
+  "4000L": { heightCm: 175, diameterCm: 150 },
+  "5000L": { heightCm: 190, diameterCm: 165 },
+  "10000L": { heightCm: 230, diameterCm: 200 },
+};
+
+export const BIN_DIMENSIONS: Record<string, { heightCm: number; widthCm: number }> = {
+  "50L": { heightCm: 55, widthCm: 40 },
+  "120L": { heightCm: 75, widthCm: 50 },
+  "240L": { heightCm: 95, widthCm: 58 },
+  "600L": { heightCm: 120, widthCm: 80 },
+  "1000L": { heightCm: 140, widthCm: 100 },
+};
 
 export const COMMERCIAL_FAQS = [
   {

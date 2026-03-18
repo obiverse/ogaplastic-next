@@ -211,11 +211,11 @@ export function Navbar() {
               <Button
                 variant="contained"
                 color="primary"
-                href="#contact"
                 size="small"
                 sx={{ ml: 2, py: 1.25, px: 2.5 }}
+                onClick={() => window.dispatchEvent(new CustomEvent("oga-open-order-builder", { detail: {} }))}
               >
-                Get a Quote
+                Order Now
               </Button>
               <button
                 onClick={() => setPortalOpen(true)}
@@ -344,11 +344,13 @@ export function Navbar() {
             <Button
               variant="contained"
               color="primary"
-              href="#contact"
-              onClick={closeDrawer}
+              onClick={() => {
+                closeDrawer();
+                window.dispatchEvent(new CustomEvent("oga-open-order-builder", { detail: {} }));
+              }}
               fullWidth
             >
-              Get a Quote
+              Order Now
             </Button>
             <button
               onClick={() => {
