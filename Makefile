@@ -23,7 +23,8 @@ deploy: build
 		git commit -m "Deploy $$(date -u '+%Y-%m-%d %H:%M:%S UTC')" && \
 		git remote add origin $(REMOTE) && \
 		git push -f origin $(BRANCH)
-	@echo "Deployed. Enable GitHub Pages → Settings → Pages → Branch: $(BRANCH)"
+	@rm -rf $(OUT)/.git
+	@echo "Deployed → https://obiverse.github.io/ogaplastic-next/"
 
 clean:
 	rm -rf $(OUT) .next
