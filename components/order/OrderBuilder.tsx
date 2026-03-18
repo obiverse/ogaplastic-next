@@ -1,25 +1,32 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { AnimatedCanvas } from "@/components/canvas/AnimatedCanvas";
-import { createOrderTankScene, type OrderVizConfig } from "@/components/canvas/scenes/order-tank-scene";
 import { TANK_PRICES, BIN_PRICES, formatNaira } from "@/lib/constants";
 import { ALL_STATES, STATE_TO_ZONE, DELIVERY_ZONES, estimateDelivery } from "@/lib/delivery-zones";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
-import { generateRefNumber, encodeOrderConfig, decodeOrderConfig, type OrderConfig, DEFAULT_ORDER } from "@/lib/order-config";
+import { generateRefNumber, encodeOrderConfig, decodeOrderConfig } from "@/lib/order-config";
 import { saveOrder, type SavedOrder } from "@/lib/order-store";
 import { openPrintableQuote, type QuoteData } from "./PrintableQuote";
 import { generateQRDataUrl } from "@/lib/qr";
+import { asset } from "@/lib/basepath";
 
 type ProductType = "tank" | "bin" | "custom";
 
-const PRODUCT_TABS: { id: ProductType; label: string }[] = [
-  { id: "tank", label: "Water Tank" },
-  { id: "bin", label: "Waste Bin" },
-  { id: "custom", label: "Custom" },
+interface CartItem {
+  volume: string;
+  type?: string;
+  price: number;
+  quantity: number;
+}
+
+const PRODUCT_TABS: { id: ProductType; label: string; image: string }[] = [
+  { id: "tank", label: "Water Tanks", image: "/images/water-tank-main.png" },
+  { id: "bin", label: "Waste Bins", image: "/images/waste-bin-drawing.png" },
+  { id: "custom", label: "Custom", image: "/images/tank-inner-layer.png" },
 ];
 
 const WA_ICON = (
@@ -29,27 +36,42 @@ const WA_ICON = (
   </svg>
 );
 
+function initCart(prices: readonly { volume: string; price: number; type?: string }[]): CartItem[] {
+  return prices.map((p) => ({
+    volume: p.volume,
+    type: "type" in p ? (p as { type: string }).type : undefined,
+    price: p.price,
+    quantity: 0,
+  }));
+}
+
 export function OrderBuilder() {
   const [open, setOpen] = useState(false);
   const [productType, setProductType] = useState<ProductType>("tank");
-  const [volumeIndex, setVolumeIndex] = useState(0);
-  const [quantity, setQuantity] = useState(1);
+  const [tankCart, setTankCart] = useState<CartItem[]>(() => initCart(TANK_PRICES));
+  const [binCart, setBinCart] = useState<CartItem[]>(() => initCart(BIN_PRICES));
   const [deliveryState, setDeliveryState] = useState("");
   const [branding, setBranding] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const isMobile = useMediaQuery("(max-width:640px)");
 
-  const prices = productType === "tank" ? TANK_PRICES : BIN_PRICES;
-  const item = prices[volumeIndex] || prices[0];
-  const unitPrice = item?.price ?? 0;
-  const subtotal = unitPrice * quantity;
+  const cart = productType === "tank" ? tankCart : binCart;
+  const setCart = productType === "tank" ? setTankCart : setBinCart;
+  const activeItems = cart.filter((item) => item.quantity > 0);
+  const hasItems = activeItems.length > 0;
 
-  // Delivery estimate
+  // Totals
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Delivery — use the largest item for estimate
   const zoneId = STATE_TO_ZONE[deliveryState] || "";
   const zone = DELIVERY_ZONES.find((z) => z.id === zoneId);
-  const volumeL = parseInt(item?.volume) || 750;
-  const [delMin, delMax] = zoneId ? estimateDelivery(zoneId, volumeL, quantity) : [0, 0];
+  const largestVolume = activeItems.length > 0
+    ? Math.max(...activeItems.map((item) => parseInt(item.volume) || 750))
+    : 750;
+  const [delMin, delMax] = zoneId ? estimateDelivery(zoneId, largestVolume, totalQty) : [0, 0];
   const deliveryEstimate = zoneId ? `${formatNaira(delMin)}–${formatNaira(delMax)}` : "";
   const totalMin = subtotal + delMin;
   const totalMax = subtotal + delMax;
@@ -57,24 +79,26 @@ export function OrderBuilder() {
     ? `${formatNaira(totalMin)}–${formatNaira(totalMax)}`
     : formatNaira(subtotal);
 
-  // Canvas config ref
-  const configRef = useRef<OrderVizConfig>({
-    productType: "tank",
-    volumeIndex: 0,
-    maxIndex: TANK_PRICES.length - 1,
-  });
+  const tab = PRODUCT_TABS.find((t) => t.id === productType)!;
 
-  useEffect(() => {
-    configRef.current = {
-      productType,
-      volumeIndex,
-      maxIndex: prices.length - 1,
-    };
-  }, [productType, volumeIndex, prices.length]);
+  // Update cart item quantity
+  function updateQty(index: number, delta: number) {
+    setCart((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], quantity: Math.max(0, next[index].quantity + delta) };
+      return next;
+    });
+  }
 
-  const scene = useMemo(() => createOrderTankScene(configRef), []);
+  function setQty(index: number, qty: number) {
+    setCart((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], quantity: Math.max(0, qty) };
+      return next;
+    });
+  }
 
-  // Listen for open events from other sections
+  // Listen for open events
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
@@ -85,8 +109,19 @@ export function OrderBuilder() {
       } else if (detail?.product === "custom") {
         setProductType("custom");
       }
-      if (detail?.volumeIndex != null) setVolumeIndex(detail.volumeIndex);
-      if (detail?.quantity) setQuantity(detail.quantity);
+      // Pre-fill a specific item if index+quantity provided
+      if (detail?.volumeIndex != null && detail?.quantity) {
+        const targetCart = detail.product === "bin" || detail.product === "bins" ? initCart(BIN_PRICES) : initCart(TANK_PRICES);
+        targetCart[detail.volumeIndex] = {
+          ...targetCart[detail.volumeIndex],
+          quantity: detail.quantity,
+        };
+        if (detail.product === "bin" || detail.product === "bins") {
+          setBinCart(targetCart);
+        } else {
+          setTankCart(targetCart);
+        }
+      }
       setOpen(true);
     };
     window.addEventListener("oga-open-order-builder", handler);
@@ -100,10 +135,17 @@ export function OrderBuilder() {
       const config = decodeOrderConfig(hash.slice(7));
       if (config) {
         setProductType(config.productType);
-        setVolumeIndex(config.volumeIndex);
-        setQuantity(config.quantity);
         setDeliveryState(config.deliveryState);
         setBranding(config.branding);
+        // Restore single-item for backward compat
+        if (config.volumeIndex != null && config.quantity) {
+          const targetCart = config.productType === "bin" ? initCart(BIN_PRICES) : initCart(TANK_PRICES);
+          if (targetCart[config.volumeIndex]) {
+            targetCart[config.volumeIndex].quantity = config.quantity;
+          }
+          if (config.productType === "bin") setBinCart(targetCart);
+          else setTankCart(targetCart);
+        }
         setOpen(true);
       }
     }
@@ -113,48 +155,60 @@ export function OrderBuilder() {
 
   function handleProductChange(type: ProductType) {
     setProductType(type);
-    setVolumeIndex(0);
   }
 
-  function buildOrderDetails() {
+  function buildCartSummary() {
     const ref = generateRefNumber();
     const productName = productType === "tank" ? "Water Tank" : productType === "bin" ? "Waste Bin" : "Custom Product";
+    return { ref, productName };
+  }
+
+  function buildMultiLineMessage() {
+    const { ref, productName } = buildCartSummary();
+    const lines = [
+      `ORDER ${ref}`,
+      `========================`,
+    ];
+    for (const item of activeItems) {
+      lines.push(`${item.quantity}x ${item.volume} ${productName} @ ${formatNaira(item.price)} = ${formatNaira(item.price * item.quantity)}`);
+    }
+    lines.push(``, `Subtotal: ${formatNaira(subtotal)}`);
+    if (zone) {
+      lines.push(`Delivery: Zone ${zone.id} — ${zone.name}`);
+      lines.push(`Est. delivery: ${deliveryEstimate}`);
+    }
+    if (branding) lines.push(`Branding: Yes (custom logo)`);
+    lines.push(``, `ESTIMATED TOTAL: ${totalDisplay}`, `========================`);
+    lines.push(`Prices ex-factory. Delivery estimate`, `to be confirmed by our team.`);
+    lines.push(``, `Reply YES to confirm this order.`);
+    return { ref, message: lines.join("\n") };
+  }
+
+  function handleOrder() {
+    const { ref, message } = buildMultiLineMessage();
+    const { productName } = buildCartSummary();
+    const number = "2348033585187"; // from WHATSAPP_LINES[0]
+    const url = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+
+    // Save to IndexedDB (save first active item as primary for history display)
+    const primary = activeItems[0];
     const orderHash = encodeOrderConfig({
       productType,
-      volumeIndex,
-      quantity,
+      volumeIndex: cart.indexOf(primary),
+      quantity: primary?.quantity ?? 1,
       color: "grey",
       deliveryState,
       branding,
     });
-    return { ref, productName, orderHash };
-  }
 
-  function handleOrder() {
-    const { ref, productName, orderHash } = buildOrderDetails();
-    const url = buildWhatsAppUrl({
-      type: "catalog-order",
-      ref,
-      product: productName,
-      volume: item.volume,
-      quantity,
-      unitPrice,
-      subtotal,
-      deliveryZone: zone ? `Zone ${zone.id} — ${zone.name}` : undefined,
-      deliveryEstimate: deliveryEstimate || undefined,
-      branding,
-      total: totalDisplay,
-    });
-
-    // Save to IndexedDB
     const saved: SavedOrder = {
       ref,
       timestamp: Date.now(),
       productType,
       productName,
-      volume: item.volume,
-      quantity,
-      unitPrice,
+      volume: activeItems.map((i) => `${i.quantity}x ${i.volume}`).join(", "),
+      quantity: totalQty,
+      unitPrice: 0,
       subtotal,
       deliveryState,
       deliveryZone: zone ? `Zone ${zone.id}` : "",
@@ -171,7 +225,16 @@ export function OrderBuilder() {
   }
 
   function handlePrintQuote() {
-    const { ref, productName, orderHash } = buildOrderDetails();
+    const { ref } = buildCartSummary();
+    const productName = productType === "tank" ? "Water Tank" : "Waste Bin";
+    const orderHash = encodeOrderConfig({
+      productType,
+      volumeIndex: 0,
+      quantity: totalQty,
+      color: "grey",
+      deliveryState,
+      branding,
+    });
     const orderUrl = `${window.location.origin}${window.location.pathname}#order=${orderHash}`;
     const qrDataUrl = generateQRDataUrl(orderUrl, 160);
 
@@ -179,9 +242,9 @@ export function OrderBuilder() {
       ref,
       date: new Date().toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" }),
       productName,
-      volume: item.volume,
-      quantity,
-      unitPrice: formatNaira(unitPrice),
+      volume: activeItems.map((i) => `${i.quantity}x ${i.volume}`).join(", "),
+      quantity: totalQty,
+      unitPrice: activeItems.length === 1 ? formatNaira(activeItems[0].price) : "Multiple",
       subtotal: formatNaira(subtotal),
       deliveryState,
       deliveryZone: zone ? `Zone ${zone.id} — ${zone.name}` : "",
@@ -194,15 +257,15 @@ export function OrderBuilder() {
   }
 
   function handleShare() {
-    const config: OrderConfig = {
+    const orderHash = encodeOrderConfig({
       productType,
-      volumeIndex,
-      quantity,
+      volumeIndex: 0,
+      quantity: totalQty,
       color: "grey",
       deliveryState,
       branding,
-    };
-    const url = `${window.location.origin}${window.location.pathname}#order=${encodeOrderConfig(config)}`;
+    });
+    const url = `${window.location.origin}${window.location.pathname}#order=${orderHash}`;
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -227,7 +290,6 @@ export function OrderBuilder() {
         },
       }}
     >
-      {/* Close button */}
       <IconButton
         onClick={handleClose}
         aria-label="Close order builder"
@@ -245,117 +307,126 @@ export function OrderBuilder() {
         </svg>
       </IconButton>
 
-      <div className={`${isMobile ? "" : "grid grid-cols-2"} overflow-y-auto`} style={{ maxHeight: isMobile ? "100vh" : "90vh" }}>
-        {/* Canvas viz column */}
+      <div className={`${isMobile ? "" : "grid grid-cols-5"} overflow-y-auto`} style={{ maxHeight: isMobile ? "100vh" : "90vh" }}>
+        {/* Product image column — 2/5 width */}
         <div
-          className="relative bg-teal-deep"
-          style={{ minHeight: isMobile ? 200 : 400 }}
+          className={`relative bg-teal-deep flex items-center justify-center ${isMobile ? "" : "col-span-2"}`}
+          style={{ minHeight: isMobile ? 180 : "auto" }}
         >
-          <AnimatedCanvas
-            skin={scene}
-            className="absolute inset-0"
-            tickRate={2}
-            pauseOffscreen={false}
-          />
-          <div className="absolute bottom-4 left-4 right-4 text-center">
-            <span className="text-white/60 text-xs">
-              {productType === "custom" ? "Custom Product" : `${item.volume} ${productType === "tank" ? "Water Tank" : "Waste Bin"}`}
-            </span>
+          <div className="relative p-6">
+            <Image
+              src={asset(tab.image)}
+              alt={tab.label}
+              width={280}
+              height={320}
+              className="object-contain drop-shadow-2xl max-h-[280px]"
+              style={{ maxWidth: "100%", height: "auto" }}
+              priority
+            />
           </div>
+          {hasItems && (
+            <div className="absolute bottom-3 left-3 right-3 text-center">
+              <span className="inline-flex items-center gap-1.5 bg-gold/90 text-teal-deep px-3 py-1 rounded-full text-xs font-bold">
+                {totalQty} item{totalQty !== 1 ? "s" : ""} in order
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Form column */}
-        <div className="p-6 space-y-6">
+        {/* Form column — 3/5 width */}
+        <div className={`p-6 space-y-5 ${isMobile ? "" : "col-span-3"}`}>
           <div>
             <h2 className="font-display text-xl font-bold text-heading">
               Build Your Order
             </h2>
             <p className="text-muted text-sm mt-1">
-              Configure and order directly via WhatsApp
+              Select sizes and quantities, then order via WhatsApp
             </p>
           </div>
 
           {/* Product type tabs */}
-          <div>
-            <label className="text-xs font-semibold text-muted uppercase tracking-wider">Product</label>
-            <div className="flex gap-2 mt-2">
-              {PRODUCT_TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => handleProductChange(tab.id)}
-                  className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-                    productType === tab.id
-                      ? "bg-teal text-white shadow-md"
-                      : "bg-surface-alt text-muted hover:text-heading"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex gap-2">
+            {PRODUCT_TABS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => handleProductChange(t.id)}
+                className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                  productType === t.id
+                    ? "bg-teal text-white shadow-md"
+                    : "bg-surface-alt text-muted hover:text-heading"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
           </div>
 
-          {/* Size selector */}
-          {productType !== "custom" && (
+          {/* Multi-item size selector with per-row quantity */}
+          {productType !== "custom" ? (
             <div>
-              <label className="text-xs font-semibold text-muted uppercase tracking-wider">Size</label>
-              <div className="mt-2 space-y-1">
-                {prices.map((p, i) => (
-                  <button
-                    key={p.volume}
-                    type="button"
-                    onClick={() => setVolumeIndex(i)}
-                    className={`w-full flex items-center justify-between py-2.5 px-3 rounded-lg text-sm transition-all cursor-pointer ${
-                      volumeIndex === i
-                        ? "bg-teal/10 ring-1 ring-teal text-heading font-medium"
-                        : "hover:bg-surface-alt text-body"
+              <label className="text-xs font-semibold text-muted uppercase tracking-wider">
+                Select sizes &amp; quantities
+              </label>
+              <div className="mt-2 space-y-1.5">
+                {cart.map((item, i) => (
+                  <div
+                    key={item.volume}
+                    className={`flex items-center gap-3 py-2 px-3 rounded-lg transition-all ${
+                      item.quantity > 0
+                        ? "bg-teal/10 ring-1 ring-teal/40"
+                        : "hover:bg-surface-alt"
                     }`}
                   >
-                    <span className="flex items-center gap-2">
-                      <span className={`w-2.5 h-2.5 rounded-full border-2 transition-colors ${
-                        volumeIndex === i ? "border-teal bg-teal" : "border-light-grey"
-                      }`} />
-                      {p.volume} {"type" in p ? (p as { type: string }).type : ""}
-                    </span>
-                    <span className={`font-bold ${volumeIndex === i ? "text-teal" : "text-muted"}`}>
-                      {formatNaira(p.price)}
-                    </span>
-                  </button>
+                    {/* Volume + price */}
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-sm ${item.quantity > 0 ? "text-heading font-medium" : "text-body"}`}>
+                        {item.volume} {item.type || ""}
+                      </span>
+                      <span className={`text-sm ml-2 ${item.quantity > 0 ? "text-teal font-bold" : "text-muted"}`}>
+                        {formatNaira(item.price)}
+                      </span>
+                    </div>
+
+                    {/* Quantity stepper */}
+                    <div className="flex items-center gap-0 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => updateQty(i, -1)}
+                        disabled={item.quantity === 0}
+                        className="w-9 h-9 flex items-center justify-center rounded-l-lg bg-surface-alt text-heading hover:bg-light-grey disabled:opacity-30 transition-colors text-sm font-bold cursor-pointer disabled:cursor-default"
+                      >
+                        &minus;
+                      </button>
+                      <input
+                        type="number"
+                        min={0}
+                        value={item.quantity}
+                        onChange={(e) => setQty(i, parseInt(e.target.value) || 0)}
+                        className="w-10 h-9 text-center bg-surface-alt/50 text-heading font-bold tabular-nums border-x border-light-grey text-sm outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => updateQty(i, 1)}
+                        className="w-9 h-9 flex items-center justify-center rounded-r-lg bg-surface-alt text-heading hover:bg-light-grey transition-colors text-sm font-bold cursor-pointer"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    {/* Line total */}
+                    {item.quantity > 0 && (
+                      <span className="text-xs font-bold text-teal w-20 text-right flex-shrink-0">
+                        {formatNaira(item.price * item.quantity)}
+                      </span>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
-          )}
-
-          {productType === "custom" && (
+          ) : (
             <div className="bg-surface-alt rounded-xl p-4 text-sm text-muted">
               Custom products are manufactured to your specifications. Describe your requirements in the WhatsApp message and our team will provide a detailed quote.
-            </div>
-          )}
-
-          {/* Quantity */}
-          {productType !== "custom" && (
-            <div>
-              <label className="text-xs font-semibold text-muted uppercase tracking-wider">Quantity</label>
-              <div className="flex items-center gap-0 mt-2">
-                <button
-                  type="button"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="w-11 h-11 flex items-center justify-center rounded-l-lg bg-surface-alt text-heading hover:bg-light-grey transition-colors text-lg font-bold cursor-pointer"
-                >
-                  &minus;
-                </button>
-                <span className="w-14 h-11 flex items-center justify-center bg-surface-alt/50 text-heading font-bold tabular-nums border-x border-light-grey">
-                  {quantity}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className="w-11 h-11 flex items-center justify-center rounded-r-lg bg-surface-alt text-heading hover:bg-light-grey transition-colors text-lg font-bold cursor-pointer"
-                >
-                  +
-                </button>
-              </div>
             </div>
           )}
 
@@ -393,12 +464,18 @@ export function OrderBuilder() {
           </label>
 
           {/* Order summary */}
-          {productType !== "custom" && (
+          {hasItems && (
             <div className="bg-surface-alt rounded-xl p-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted">{item.volume} x {quantity}</span>
-                <span className="text-heading font-bold">{formatNaira(subtotal)}</span>
-              </div>
+              {activeItems.map((item) => (
+                <div key={item.volume} className="flex justify-between text-sm">
+                  <span className="text-muted">
+                    {item.quantity}x {item.volume} {item.type || ""}
+                  </span>
+                  <span className="text-heading font-bold">
+                    {formatNaira(item.price * item.quantity)}
+                  </span>
+                </div>
+              ))}
               {zoneId && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted">Est. delivery</span>
@@ -422,32 +499,39 @@ export function OrderBuilder() {
             <button
               type="button"
               onClick={handleOrder}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-white transition-all hover:brightness-110 active:scale-[0.97] cursor-pointer"
+              disabled={!hasItems && productType !== "custom"}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-white transition-all hover:brightness-110 active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ backgroundColor: "#25D366" }}
             >
               {WA_ICON}
-              {productType === "custom" ? "Request Quote on WhatsApp" : "Order via WhatsApp"}
+              {productType === "custom"
+                ? "Request Quote on WhatsApp"
+                : hasItems
+                  ? `Order ${totalQty} item${totalQty !== 1 ? "s" : ""} via WhatsApp`
+                  : "Select items to order"}
             </button>
 
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={handlePrintQuote}
-                className="py-2.5 rounded-xl text-sm font-medium text-muted hover:text-heading border border-light-grey hover:border-teal transition-all cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                Print Quote
-              </button>
-              <button
-                type="button"
-                onClick={handleShare}
-                className="py-2.5 rounded-xl text-sm font-medium text-muted hover:text-heading border border-light-grey hover:border-teal transition-all cursor-pointer"
-              >
-                {copied ? "Copied!" : "Share Link"}
-              </button>
-            </div>
+            {hasItems && (
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handlePrintQuote}
+                  className="py-2.5 rounded-xl text-sm font-medium text-muted hover:text-heading border border-light-grey hover:border-teal transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  Print Quote
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="py-2.5 rounded-xl text-sm font-medium text-muted hover:text-heading border border-light-grey hover:border-teal transition-all cursor-pointer"
+                >
+                  {copied ? "Copied!" : "Share Link"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
